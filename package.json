@@ -8,6 +8,16 @@
     "deploy": "wrangler deploy",
     "cf-typegen": "wrangler types"
   },
+  "cloudflare": {
+    "bindings": {
+      "WORKER_API_KEY": {
+        "description": "填写你自己的 Worker 访问密钥。部署后调用 /v1/models 和 /v1/chat/completions 时，需要在 Authorization 请求头里带 Bearer 这个值。示例：tr-thisforhftranslate11"
+      },
+      "HF_BEARER_TOKEN": {
+        "description": "如果目标 Hugging Face Space 不是公开接口，就在这里填写上游 Bearer Token；公开 Space 可以留空。"
+      }
+    }
+  },
   "devDependencies": {
     "typescript": "^5.8.3",
     "wrangler": "^4.21.0"

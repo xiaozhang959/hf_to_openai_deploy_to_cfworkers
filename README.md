@@ -96,9 +96,14 @@ npm run dev
 
 你可以直接点 README 顶部的 Deploy to Cloudflare 按钮进行一键部署。
 
-需要注意的是：
-这个按钮会帮你把项目部署到 Cloudflare，但不会自动替你填写私密密钥。
-所以一键部署完成后，你还需要手动补一下 secret。
+现在一键部署页面里就应该会提示填写：
+
+1. WORKER_API_KEY
+2. HF_BEARER_TOKEN（如果上游需要）
+
+如果 WORKER_API_KEY 已经在一键部署时填了，部署完成后访问 /status，应该看到：
+
+worker_api_key_configured = true
 
 也可以手动部署：
 
