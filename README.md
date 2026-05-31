@@ -87,6 +87,10 @@ npm run dev
 
 你可以直接点 README 顶部的 Deploy to Cloudflare 按钮进行一键部署。
 
+需要注意的是：
+这个按钮会帮你把项目部署到 Cloudflare，但不会自动替你填写私密密钥。
+所以一键部署完成后，你还需要手动补一下 secret。
+
 也可以手动部署：
 
 npm run deploy
@@ -100,6 +104,13 @@ npx wrangler secret put WORKER_API_KEY
 调用接口时，需要带上这个请求头：
 
 Authorization: Bearer your_worker_api_key
+
+如果你是通过 README 顶部的 Cloudflare 一键部署按钮部署的，也一样需要在部署完成后，到 Cloudflare 控制台或 Wrangler 里补这个 secret。
+
+也就是说：
+
+1. 一键部署按钮可以帮你部署代码
+2. 但 WORKER_API_KEY 这种私密值，还是要你自己填
 
 如果只是本地临时调试，也可以在 wrangler.toml 里把下面这个值改成 true：
 
