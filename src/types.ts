@@ -5,6 +5,14 @@ export interface Env {
   DEFAULT_TARGET_LANG?: string;
   ADAPTER_NAME?: string;
   HF_BEARER_TOKEN?: string;
+  GRADIO_API_NAME?: string;
+  GRADIO_SUBMIT_PATH?: string;
+  GRADIO_RESULT_PATH_TEMPLATE?: string;
+  HF_MODEL_LIST?: string;
+  HF_TARGET_LANG_LIST?: string;
+  HF_SOURCE_TEXT_PARAM?: string;
+  HF_TARGET_LANG_PARAM?: string;
+  HF_MODEL_PARAM?: string;
 }
 
 export type ChatMessage = {

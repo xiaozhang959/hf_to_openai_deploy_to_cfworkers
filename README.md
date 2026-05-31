@@ -17,9 +17,10 @@
 
 ## 当前内置示例
 
-- HF Space: https://noxwano-hy-mt2.hf.space
-- Adapter: src/adapters/hy-mt2.ts
-- 上游协议: Gradio SSE
+- 默认通用 Adapter: src/adapters/gradio-translate.ts
+- 兼容示例: src/adapters/hy-mt2.ts
+- 默认上游协议: Gradio SSE
+- 默认演示 Space: https://noxwano-hy-mt2.hf.space
 
 ## 快速开始
 
@@ -55,11 +56,20 @@ curl https://your-worker.example.workers.dev/v1/chat/completions \
 
 ## 如何复用到别的 HF Space
 
-你下次只要替换 3 个点：
+优先推荐直接改环境变量，不用改 adapter 代码。
 
-1. wrangler.toml 里的 HF_SPACE_BASE_URL
-2. 新增一个 adapter 文件到 src/adapters/
-3. 在 src/adapters/index.ts 注册它
+对于大多数同类 Gradio 翻译 Space，你下次通常只要改这些环境变量：
+
+1. HF_SPACE_BASE_URL
+2. GRADIO_SUBMIT_PATH
+3. GRADIO_RESULT_PATH_TEMPLATE
+4. HF_MODEL_LIST
+5. HF_TARGET_LANG_LIST
+6. HF_SOURCE_TEXT_PARAM
+7. HF_TARGET_LANG_PARAM
+8. HF_MODEL_PARAM
+
+只有当目标 HF Space 的请求/响应语义差异很大时，才需要新建 adapter。
 
 ## 新增 adapter 的最低要求
 
@@ -107,6 +117,13 @@ wrangler.toml 默认包含：
 - OPENAI_DEFAULT_MODEL
 - DEFAULT_TARGET_LANG
 - ADAPTER_NAME
+- GRADIO_SUBMIT_PATH
+- GRADIO_RESULT_PATH_TEMPLATE
+- HF_MODEL_LIST
+- HF_TARGET_LANG_LIST
+- HF_SOURCE_TEXT_PARAM
+- HF_TARGET_LANG_PARAM
+- HF_MODEL_PARAM
 
 如果你的目标 Space 需要鉴权，还可以额外设置：
 
