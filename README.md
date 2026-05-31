@@ -24,10 +24,19 @@ Gradio 翻译类 Space。
 1. GET /health
 用于检查服务是否正常运行，这个接口不需要鉴权。
 
-2. GET /v1/models
+2. GET /status
+用于查看 Worker 当前运行状态和关键配置是否生效，这个接口不需要鉴权。
+它会返回：
+- 当前 adapter
+- 是否关闭了 API Key 鉴权
+- WORKER_API_KEY 是否已经注入到运行时
+- HF_BEARER_TOKEN 是否已经注入到运行时
+- 当前使用的上游地址和关键路径配置
+
+3. GET /v1/models
 返回当前可用模型列表，这个接口需要 API Key。
 
-3. POST /v1/chat/completions
+4. POST /v1/chat/completions
 OpenAI 兼容接口，这个接口需要 API Key。
 
 ## 适合什么场景

@@ -2,6 +2,10 @@ import { getAdapter } from './adapters';
 import type { Env } from './types';
 import { errorJson, extractBearerToken, isTruthy, json, makeCompletion, makeModelList, makeSSEStream, parseRequest } from './utils';
 
+function hasConfiguredWorkerApiKey(env: Env): boolean {
+  return Boolean(env.WORKER_API_KEY && env.WORKER_API_KEY.trim().length > 0);
+}
+
 function ensureAuthorized(request: Request, env: Env): Response | null {
   if (isTruthy(env.DISABLE_API_KEY_AUTH)) {
     return null;
@@ -32,6 +36,27 @@ export default {
 
       if (request.method === 'GET' && url.pathname === '/health') {
         return json({ ok: true, adapter: adapter.name, upstream: env.HF_SPACE_BASE_URL });
+      }
+
+      if (request.method === 'GET' && url.pathname === '/status') {
+        return json({
+          ok: true,
+          adapter: adapter.name,
+          auth: {
+            disable_api_key_auth: isTruthy(env.DISABLE_API_KEY_AUTH),
+            worker_api_key_configured: hasConfiguredWorkerApiKey(env),
+            worker_api_key_length: env.WORKER_API_KEY ? env.WORKER_API_KEY.length : 0,
+            upstream_bearer_token_configured: Boolean(env.HF_BEARER_TOKEN && env.HF_BEARER_TOKEN.trim().length > 0),
+          },
+          config: {
+            upstream: env.HF_SPACE_BASE_URL,
+            submit_path: env.GRADIO_SUBMIT_PATH,
+            result_path_template: env.GRADIO_RESULT_PATH_TEMPLATE,
+            default_model: env.OPENAI_DEFAULT_MODEL,
+            default_target_lang: env.DEFAULT_TARGET_LANG,
+            adapter_name: env.ADAPTER_NAME,
+          },
+        });
       }
 
       if (url.pathname === '/v1/models' || url.pathname === '/v1/chat/completions') {
