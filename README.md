@@ -96,14 +96,15 @@ npm run dev
 
 你可以直接点 README 顶部的 Deploy to Cloudflare 按钮进行一键部署。
 
-现在一键部署页面里就应该会提示填写：
+现在一键部署页面里会直接出现可填写项，包括：
 
 1. WORKER_API_KEY
 2. HF_BEARER_TOKEN（如果上游需要）
 
-如果 WORKER_API_KEY 已经在一键部署时填了，部署完成后访问 /status，应该看到：
+其中：
 
-worker_api_key_configured = true
+- WORKER_API_KEY 现在按普通运行时变量处理，方便一键部署时直接填写
+- 配完部署后，访问 /status，应该看到 worker_api_key_configured = true
 
 也可以手动部署：
 
@@ -111,19 +112,13 @@ npm run deploy
 
 ## 配置 Worker API Key
 
-先配置你自己的访问密钥。
+现在默认推荐你在 Cloudflare 一键部署页面里直接填写 WORKER_API_KEY。
 
-推荐方式是使用 secret：
+这个值目前按普通运行时变量处理，目的是让一键部署时能直接出现输入框。
 
-npx wrangler secret put WORKER_API_KEY
+如果你是手动部署，也可以在 wrangler.toml 或 Cloudflare 后台里配置它。
 
-如果你是在 Cloudflare 控制台里手动配置，注意一定要把它加在：
-
-Settings -> Variables and Secrets -> Secrets
-
-不要只加到普通的 plain text variable 里。
-
-配置完成后，重新部署一次，然后访问：
+部署完成后，访问：
 
 /status
 
@@ -134,14 +129,6 @@ worker_api_key_configured = true
 调用接口时，需要带上这个请求头：
 
 Authorization: Bearer your_worker_api_key
-
-如果你是通过 README 顶部的 Cloudflare 一键部署按钮部署的，也一样需要在部署完成后，到 Cloudflare 控制台或 Wrangler 里补这个 secret。
-
-也就是说：
-
-1. 一键部署按钮可以帮你部署代码
-2. 但 WORKER_API_KEY 这种私密值，还是要你自己填
-3. 填完后要重新部署，并检查 /status
 
 如果只是本地临时调试，也可以在 wrangler.toml 里把下面这个值改成 true：
 
