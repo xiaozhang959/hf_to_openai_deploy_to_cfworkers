@@ -7,8 +7,21 @@ export function json(data: unknown, status = 200): Response {
   });
 }
 
-export function errorJson(message: string, status = 400): Response {
-  return json({ error: { message, type: 'invalid_request_error' } }, status);
+export function errorJson(message: string, status = 400, type = 'invalid_request_error'): Response {
+  return json({ error: { message, type } }, status);
+}
+
+export function isTruthy(value: string | undefined): boolean {
+  if (!value) return false;
+  const normalized = value.trim().toLowerCase();
+  return normalized === '1' || normalized === 'true' || normalized === 'yes' || normalized === 'on';
+}
+
+export function extractBearerToken(request: Request): string | null {
+  const auth = request.headers.get('authorization') ?? request.headers.get('Authorization');
+  if (!auth) return null;
+  const match = auth.match(/^Bearer\s+(.+)$/i);
+  return match ? match[1].trim() : null;
 }
 
 export function getLastUserMessage(messages: ChatMessage[]): string {

@@ -5,6 +5,8 @@ export interface Env {
   DEFAULT_TARGET_LANG?: string;
   ADAPTER_NAME?: string;
   HF_BEARER_TOKEN?: string;
+  WORKER_API_KEY?: string;
+  DISABLE_API_KEY_AUTH?: string;
   GRADIO_API_NAME?: string;
   GRADIO_SUBMIT_PATH?: string;
   GRADIO_RESULT_PATH_TEMPLATE?: string;

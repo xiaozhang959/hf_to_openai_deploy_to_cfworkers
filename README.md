@@ -38,8 +38,19 @@ npm run deploy
 
 ## OpenAI 兼容调用示例
 
+先给 Worker 配置你自己的访问密钥：
+
+npx wrangler secret put WORKER_API_KEY
+
+然后调用时带上：
+
+Authorization: Bearer your_worker_api_key
+
+示例：
+
 curl https://your-worker.example.workers.dev/v1/chat/completions \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer your_worker_api_key" \
   -d '{
     "model": "tencent/Hy-MT2-1.8B",
     "messages": [
@@ -124,6 +135,12 @@ wrangler.toml 默认包含：
 - HF_SOURCE_TEXT_PARAM
 - HF_TARGET_LANG_PARAM
 - HF_MODEL_PARAM
+- DISABLE_API_KEY_AUTH
+
+Secrets 建议配置：
+
+- WORKER_API_KEY
+- HF_BEARER_TOKEN
 
 如果你的目标 Space 需要鉴权，还可以额外设置：
 

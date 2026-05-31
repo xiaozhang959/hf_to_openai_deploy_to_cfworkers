@@ -19,3 +19,4 @@ HF_TARGET_LANG_LIST = "Arabic,Bengali,Burmese,Cantonese,Chinese,Czech,Dutch,Engl
 HF_SOURCE_TEXT_PARAM = "source_text"
 HF_TARGET_LANG_PARAM = "target_lang"
 HF_MODEL_PARAM = "selected_model"
+DISABLE_API_KEY_AUTH = "false"
