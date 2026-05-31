@@ -106,9 +106,25 @@ npm run deploy
 
 ## 配置 Worker API Key
 
-先配置你自己的访问密钥：
+先配置你自己的访问密钥。
+
+推荐方式是使用 secret：
 
 npx wrangler secret put WORKER_API_KEY
+
+如果你是在 Cloudflare 控制台里手动配置，注意一定要把它加在：
+
+Settings -> Variables and Secrets -> Secrets
+
+不要只加到普通的 plain text variable 里。
+
+配置完成后，重新部署一次，然后访问：
+
+/status
+
+确认返回里：
+
+worker_api_key_configured = true
 
 调用接口时，需要带上这个请求头：
 
@@ -120,6 +136,7 @@ Authorization: Bearer your_worker_api_key
 
 1. 一键部署按钮可以帮你部署代码
 2. 但 WORKER_API_KEY 这种私密值，还是要你自己填
+3. 填完后要重新部署，并检查 /status
 
 如果只是本地临时调试，也可以在 wrangler.toml 里把下面这个值改成 true：
 

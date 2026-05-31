@@ -46,6 +46,9 @@ export default {
             disable_api_key_auth: isTruthy(env.DISABLE_API_KEY_AUTH),
             worker_api_key_configured: hasConfiguredWorkerApiKey(env),
             worker_api_key_length: env.WORKER_API_KEY ? env.WORKER_API_KEY.length : 0,
+            worker_api_key_preview: env.WORKER_API_KEY
+              ? `${env.WORKER_API_KEY.slice(0, 3)}***${env.WORKER_API_KEY.slice(-2)}`
+              : '',
             upstream_bearer_token_configured: Boolean(env.HF_BEARER_TOKEN && env.HF_BEARER_TOKEN.trim().length > 0),
           },
           config: {
@@ -56,6 +59,12 @@ export default {
             default_target_lang: env.DEFAULT_TARGET_LANG,
             adapter_name: env.ADAPTER_NAME,
           },
+          hints: [
+            'If worker_api_key_configured is false, the Worker runtime did not receive WORKER_API_KEY.',
+            'Deploy to Cloudflare buttons do not automatically populate secrets for you.',
+            'In Cloudflare dashboard, set WORKER_API_KEY under Worker Settings -> Variables and Secrets -> Secrets, then deploy again.',
+            'A plain text variable is not the same thing as a secret in many dashboard flows.',
+          ],
         });
       }
 
