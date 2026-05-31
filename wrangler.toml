@@ -1,0 +1,13 @@
+name = "hf-space-openai-worker-template"
+main = "src/index.ts"
+compatibility_date = "2026-05-31"
+
+[observability]
+enabled = true
+
+[vars]
+HF_SPACE_BASE_URL = "https://noxwano-hy-mt2.hf.space"
+HF_API_MODE = "gradio_sse"
+OPENAI_DEFAULT_MODEL = "tencent/Hy-MT2-1.8B"
+DEFAULT_TARGET_LANG = "English"
+ADAPTER_NAME = "hy-mt2"

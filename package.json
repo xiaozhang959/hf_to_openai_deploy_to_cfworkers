@@ -1,0 +1,15 @@
+{
+  "name": "hf-space-openai-worker-template",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "cf-typegen": "wrangler types"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3",
+    "wrangler": "^4.21.0"
+  }
+}
