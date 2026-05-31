@@ -1,52 +1,116 @@
-# HF Space -> OpenAI Compatible Cloudflare Worker Template
+# HF Space 转 OpenAI 接口的 Cloudflare Workers 模板
 
-这是一个可复用模板：把 Hugging Face Space 的网页/Gradio 能力，快速包装成 OpenAI 兼容接口，并部署到 Cloudflare Workers。
+这个项目的作用是：
+把 Hugging Face Space 的接口包装成 OpenAI 兼容接口，然后部署到 Cloudflare Workers。
 
-当前已内置示例适配器：Hy-MT2 翻译器。
+目前这个模板已经可以直接用于一类很常见的场景：
+Gradio 翻译类 Space。
 
-支持接口：
-- GET /health
-- GET /v1/models
-- POST /v1/chat/completions
+仓库内已经内置好 Hy-MT2 的示例配置，同时也支持通过环境变量切换到别的同类 HF Space。
 
-核心思路：
-1. Workers 接收 OpenAI 风格请求
-2. adapter 负责把请求参数映射到具体 HF Space
-3. upstream 层负责调用 Gradio/HF 的真实接口
-4. 返回 OpenAI 兼容 JSON / SSE
+## 现在已经支持的功能
 
-## 当前内置示例
+1. 部署到 Cloudflare Workers
+2. OpenAI 风格接口
+3. Bearer Token 鉴权
+4. 对接 Hugging Face Space 的 Gradio SSE 接口
+5. 通过环境变量切换不同的 Space 地址和参数名
+6. 保留 Hy-MT2 的专用适配器示例
 
-- 默认通用 Adapter: src/adapters/gradio-translate.ts
-- 兼容示例: src/adapters/hy-mt2.ts
-- 默认上游协议: Gradio SSE
-- 默认演示 Space: https://noxwano-hy-mt2.hf.space
+## 接口列表
 
-## 快速开始
+1. GET /health
+用于检查服务是否正常运行，这个接口不需要鉴权。
 
-1. 安装依赖
+2. GET /v1/models
+返回当前可用模型列表，这个接口需要 API Key。
+
+3. POST /v1/chat/completions
+OpenAI 兼容接口，这个接口需要 API Key。
+
+## 适合什么场景
+
+这个模板最适合下面这种情况：
+
+1. 目标是 Hugging Face Space
+2. Space 是 Gradio 应用
+3. 后端接口是 /gradio_api/call/v2/... 这种形式
+4. 返回结果通过 SSE 或 event_id 轮询拿到
+5. 你想把它包装成 OpenAI SDK 可以调用的接口
+
+## 项目结构
+
+src/
+  adapters/
+    gradio-translate.ts
+    hy-mt2.ts
+    index.ts
+  index.ts
+  types.ts
+  upstream.ts
+  utils.ts
+
+templates/
+  adapter-template.md
+
+文件说明：
+
+1. src/index.ts
+Worker 入口，处理路由、鉴权和统一返回格式。
+
+2. src/adapters/gradio-translate.ts
+通用翻译适配器。大多数同类 Gradio 翻译 Space 优先用这个。
+
+3. src/adapters/hy-mt2.ts
+Hy-MT2 的示例适配器，主要用于保留一个明确可参考的实现。
+
+4. src/upstream.ts
+负责请求上游 HF Space。
+
+5. src/utils.ts
+通用工具函数。
+
+6. templates/adapter-template.md
+如果以后真的遇到通用配置不够用的 Space，可以按这个模板写新的 adapter。
+
+## 安装
 
 npm install
 
-2. 本地开发
+## 本地开发
 
 npm run dev
 
-3. 部署
+## 部署
 
 npm run deploy
 
-## OpenAI 兼容调用示例
+## 配置 Worker API Key
 
-先给 Worker 配置你自己的访问密钥：
+先配置你自己的访问密钥：
 
 npx wrangler secret put WORKER_API_KEY
 
-然后调用时带上：
+调用接口时，需要带上这个请求头：
 
 Authorization: Bearer your_worker_api_key
 
-示例：
+如果只是本地临时调试，也可以在 wrangler.toml 里把下面这个值改成 true：
+
+DISABLE_API_KEY_AUTH = "true"
+
+注意：
+线上环境不要关闭鉴权。
+
+## 如果上游 HF Space 还需要鉴权
+
+有些 Hugging Face Space 不是公开接口，这种情况下还需要配置上游访问密钥：
+
+npx wrangler secret put HF_BEARER_TOKEN
+
+配置后，Worker 会把这个 Bearer Token 带给上游 HF Space。
+
+## 调用示例
 
 curl https://your-worker.example.workers.dev/v1/chat/completions \
   -H "Content-Type: application/json" \
@@ -61,15 +125,60 @@ curl https://your-worker.example.workers.dev/v1/chat/completions \
     }
   }'
 
-## 返回格式
+## 返回结果
 
-返回 OpenAI chat completions 风格 JSON。
+返回格式是 OpenAI chat completions 风格的 JSON。
 
-## 如何复用到别的 HF Space
+如果请求使用 stream=true，则返回 SSE。
 
-优先推荐直接改环境变量，不用改 adapter 代码。
+## 默认环境变量说明
 
-对于大多数同类 Gradio 翻译 Space，你下次通常只要改这些环境变量：
+wrangler.toml 里当前已经提供这些变量：
+
+1. HF_SPACE_BASE_URL
+目标 Hugging Face Space 的地址。
+
+2. HF_API_MODE
+当前模板里主要用于标识上游接口类型，默认是 gradio_sse。
+
+3. OPENAI_DEFAULT_MODEL
+默认模型名。如果请求里不传 model，就用这个值。
+
+4. DEFAULT_TARGET_LANG
+默认目标语言。
+
+5. ADAPTER_NAME
+当前使用哪个 adapter。默认是 gradio-translate。
+
+6. GRADIO_SUBMIT_PATH
+提交任务的上游路径。
+
+7. GRADIO_RESULT_PATH_TEMPLATE
+读取结果的上游路径模板，里面的 {event_id} 会自动替换。
+
+8. HF_MODEL_LIST
+当前允许的模型列表，逗号分隔。
+
+9. HF_TARGET_LANG_LIST
+当前允许的目标语言列表，逗号分隔。
+
+10. HF_SOURCE_TEXT_PARAM
+上游接口里“源文本”的字段名。
+
+11. HF_TARGET_LANG_PARAM
+上游接口里“目标语言”的字段名。
+
+12. HF_MODEL_PARAM
+上游接口里“模型名”的字段名。
+
+13. DISABLE_API_KEY_AUTH
+是否关闭 Worker 自身的 API Key 鉴权。默认是 false。
+
+## 怎么切换到别的同类 HF Space
+
+如果新的 HF Space 仍然是同类 Gradio 翻译接口，通常你只需要修改环境变量，不需要改代码。
+
+常见需要改的是：
 
 1. HF_SPACE_BASE_URL
 2. GRADIO_SUBMIT_PATH
@@ -80,79 +189,17 @@ curl https://your-worker.example.workers.dev/v1/chat/completions \
 7. HF_TARGET_LANG_PARAM
 8. HF_MODEL_PARAM
 
-只有当目标 HF Space 的请求/响应语义差异很大时，才需要新建 adapter。
+也就是说，很多情况下你只是在换配置，不是在重写项目。
 
-## 新增 adapter 的最低要求
+## Hy-MT2 当前的请求约定
 
-每个 adapter 只要实现这几个方法：
+这个模板默认演示的是 Hy-MT2，对应调用方式如下：
 
-- name
-- listModels(env)
-- resolveInput(ctx)
-- invoke(ctx, input)
+1. messages 里最后一个 user 内容作为待翻译文本
+2. extra_body.target_lang 作为目标语言
+3. model 作为模型名
 
-其中：
-- resolveInput 负责把 OpenAI 请求解析成你的业务参数
-- invoke 负责真正请求 Hugging Face Space
-
-## 适配 Gradio Space 的建议流程
-
-先探测这些地址：
-- /config
-- /gradio_api/info
-- /gradio_api/openapi.json
-
-重点看：
-- named_endpoints
-- 参数名
-- 是否是 /gradio_api/call/v2/... 
-- 返回是否为 SSE
-
-## 目录结构
-
-src/
-  adapters/
-    hy-mt2.ts
-    index.ts
-  index.ts
-  types.ts
-  upstream.ts
-  utils.ts
-
-## 环境变量
-
-wrangler.toml 默认包含：
-
-- HF_SPACE_BASE_URL
-- HF_API_MODE
-- OPENAI_DEFAULT_MODEL
-- DEFAULT_TARGET_LANG
-- ADAPTER_NAME
-- GRADIO_SUBMIT_PATH
-- GRADIO_RESULT_PATH_TEMPLATE
-- HF_MODEL_LIST
-- HF_TARGET_LANG_LIST
-- HF_SOURCE_TEXT_PARAM
-- HF_TARGET_LANG_PARAM
-- HF_MODEL_PARAM
-- DISABLE_API_KEY_AUTH
-
-Secrets 建议配置：
-
-- WORKER_API_KEY
-- HF_BEARER_TOKEN
-
-如果你的目标 Space 需要鉴权，还可以额外设置：
-
-- HF_BEARER_TOKEN
-
-命令：
-
-wrangler secret put HF_BEARER_TOKEN
-
-## Hy-MT2 的参数约定
-
-请求体示例：
+请求示例：
 
 {
   "model": "tencent/Hy-MT2-1.8B",
@@ -164,22 +211,15 @@ wrangler secret put HF_BEARER_TOKEN
   }
 }
 
-约定：
-- 最后一个 user message 作为待翻译文本
-- extra_body.target_lang 作为目标语言
-- model 作为选用模型
+## 什么时候需要新建 adapter
 
-## 下一步可扩展
+如果目标 HF Space 和当前这种通用 Gradio 翻译接口差异很大，才需要新建 adapter。
 
-后续可以继续加：
-- 更通用的 Gradio text-generation adapter
-- JSON schema 参数映射
-- 多 adapter 路由
-- API Key 鉴权
-- usage 统计
-- 更细粒度流式输出
+例如：
 
-如果你要把它包装成你自己的长期模板仓库，建议仓库名：
-- hf-space-openai-worker-template
-- hf2openai-worker
-- openai-compatible-hf-worker
+1. 参数结构完全不同
+2. 返回格式完全不同
+3. 不是 SSE / event_id 这种结果获取方式
+4. 不是翻译任务，而是别的任务类型
+
+如果只是字段名不同，优先改环境变量就够了。
