@@ -1,5 +1,7 @@
 # HF Space 转 OpenAI 接口的 Cloudflare Workers 模板
 
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/xiaozhang959/hf_to_openai_deploy_to_cfworkers)
+
 这个项目的作用是：
 把 Hugging Face Space 的接口包装成 OpenAI 兼容接口，然后部署到 Cloudflare Workers。
 
@@ -82,6 +84,10 @@ npm install
 npm run dev
 
 ## 部署
+
+你可以直接点 README 顶部的 Deploy to Cloudflare 按钮进行一键部署。
+
+也可以手动部署：
 
 npm run deploy
 
